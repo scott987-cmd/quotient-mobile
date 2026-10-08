@@ -1222,9 +1222,17 @@ final class DeliveryInboxUITests: XCTestCase {
         let app = XCUIApplication(); app.launchEnvironment["LLMQ_FOLDER"] = root.path; app.launch()
         XCTAssertTrue(app.staticTexts["交付进展"].waitForExistence(timeout: 12))
         XCTAssertFalse(app.staticTexts["卡住了："].exists)
-        for _ in 0..<4 where !app.staticTexts["仅供验收的授权选择"].isHittable { app.swipeUp() }
-        let question = app.staticTexts["仅供验收的授权选择"]
-        XCTAssertTrue(question.isHittable)
+        let question = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "仅供验收的授权选择")).firstMatch
+        let tabBar = app.tabBars.firstMatch
+        let window = app.windows.firstMatch.frame
+        let safeBottom = tabBar.exists && tabBar.frame.minY > window.midY ? tabBar.frame.minY : window.maxY
+        // The text may be hittable while its parent card is covered by the bottom tab bar.
+        for _ in 0..<4 {
+            if question.exists && question.isHittable && question.frame.maxY <= safeBottom - 12 { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(question.isHittable && question.frame.maxY <= safeBottom - 12,
+                      "Question card must be fully above the tab bar before tapping")
         let screen = XCTAttachment(screenshot: app.screenshot()); screen.name = "无额度快照的可操作待办"; screen.lifetime = .keepAlways; add(screen)
         question.tap()
         XCTAssertTrue(app.staticTexts["隔离方案甲"].waitForExistence(timeout: 5))
