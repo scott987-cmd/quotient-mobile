@@ -526,7 +526,9 @@ final class SmokeUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["等你验收"].exists,
                        "旧的重复入口不应复活")
 
-        app.staticTexts["设置"].tap()
+        // iOS 26 exposes the row as a Button with a nested StaticText. Tapping
+        // the text can be acknowledged by XCTest without activating the link.
+        app.buttons["设置"].tap()
         XCTAssertTrue(app.navigationBars["设置"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Agent 可用额度"].exists)
         XCTAssertTrue(app.staticTexts["连接"].exists)
