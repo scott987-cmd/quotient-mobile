@@ -6,7 +6,7 @@ Apple signing identity, private iCloud data, task ledger, or QA recordings.
 
 ## Build for the simulator
 
-Requirements: Xcode with an iOS 17 or newer simulator and
+Requirements: Xcode 26.6 with an iOS 26 simulator and
 [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```sh
