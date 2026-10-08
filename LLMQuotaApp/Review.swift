@@ -568,7 +568,8 @@ struct EvidenceThumb: View {
 
     /// 大录屏第一次打开时经常还只是 iCloud 占位符。以前只试一次，2.5 秒
     /// 没下完就永久转圈；这里给同步继续推进的机会，仍然全在后台执行。
-    private func retrying<T>(_ operation: () async -> T?) async -> T? {
+    @MainActor
+    private func retrying<T>(_ operation: @MainActor () async -> T?) async -> T? {
         for attempt in 0..<3 {
             if let value = await operation() { return value }
             if attempt < 2 {
