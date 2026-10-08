@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "af47d2705f8ac0a3d85adb033dcb77d5804e8db2",
+  "sourceCommit": "114d740c3f5b4e7eb373b4acdd6a5484ca654fd8",
   "sourceIncludesWorkingTreeChanges": true,
   "files": {
     ".github/workflows/ci.yml": "59274715991da49c180edd6d7f2d9d6e7bdfbd9a67348fe67c28eccd8c73db56",
@@ -24,7 +24,7 @@
     "LLMQuotaApp/Playbook.swift": "1d9917bc1f4f62e34f4922d555535eb16126d4e5bf182ce4eaf87b6a83e35f74",
     "LLMQuotaApp/PrivacyInfo.xcprivacy": "1ed83ac6b96e087b01dd3e1543999df544491500f9951141b192535660b3359e",
     "LLMQuotaApp/Push.swift": "44594b85c358e4f4abee795950a80f3467e5df49caa6c095552cdab11b047884",
-    "LLMQuotaApp/Reserve.swift": "65ccfce5fc08ce58482ed1047d0e7e08b3b6222be900c75b0ac8871598f43231",
+    "LLMQuotaApp/Reserve.swift": "60fb35815c213cd6cf1bed276426243efa63676bdb13a58adbf1c0753a19a09a",
     "LLMQuotaApp/Review.swift": "f206fed39c3f4a6b903a7c7a66ada0a4148a8eefc4eb4cb235ce620c00af8025",
     "LLMQuotaApp/SharedDirectoryWriter.swift": "0b4a07e834e3acf71ab79f42a26c7edd85651f7bb1c891017ee3d68b3bd12e04",
     "LLMQuotaApp/Staff.swift": "de3956520dfb91180034424d7215a01f8d9e480b2ff9d1c4dc51a792b87041bb",

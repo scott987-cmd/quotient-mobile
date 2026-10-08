@@ -7,6 +7,22 @@ struct ReserveView: View {
     /// 手机上刚拖出来、还没被 Mac 确认的值（百分比）。
     @State private var draft: [String: Double] = [:]
 
+    private struct ConflictMarker: Equatable {
+        let updatedAt: Double?
+        let fraction: Double?
+    }
+
+    /// 仅在新的冲突回报到达时清掉它之前的拖动值；同一冲突下的新拖动要保留。
+    private var conflictMarkers: [String: ConflictMarker] {
+        var markers: [String: ConflictMarker] = [:]
+        for report in platforms {
+            guard let role = report.role, role.reserveConflict == true else { continue }
+            markers[report.platform] = ConflictMarker(
+                updatedAt: role.reserveUpdatedAt, fraction: role.reserveFraction)
+        }
+        return markers
+    }
+
     /// 只列**已检测到的**平台。没装的没有额度可留，摆出来只是噪音。
     private var platforms: [PlatformReport] {
         (store.dashboard?.reports ?? [])
@@ -61,6 +77,13 @@ struct ReserveView: View {
         .navigationTitle("调度留白")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await store.refresh() }
+        .onChange(of: conflictMarkers) { previous, current in
+            for (platform, marker) in current where previous[platform] != marker {
+                guard let report = platforms.first(where: { $0.platform == platform }),
+                      !hasNewerConflictRequest(report) else { continue }
+                draft.removeValue(forKey: platform)
+            }
+        }
     }
 
     // MARK: - 值
