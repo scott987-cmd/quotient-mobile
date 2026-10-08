@@ -1,0 +1,23 @@
+name: Mobile CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source snapshot
+        run: python3 Tools/verify_manifest.py
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Build and test on iPhone simulator
+        run: |
+          SIMULATOR_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(v["udid"] for devices in d["devices"].values() for v in devices if v["name"].startswith("iPhone") and v["state"] in ("Shutdown", "Booted")))')
+          xcodebuild test -project LLMQuotaApp.xcodeproj -scheme LLMQuotaApp \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+            CODE_SIGNING_ALLOWED=NO

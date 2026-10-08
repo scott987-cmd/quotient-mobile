@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 推送。development 值在 TestFlight/App Store 构建时由苹果自动
+	     换成 production —— 所以这里写 development 两套都能跑，
+	     写死 production 反而会让 Xcode 直连调试收不到推送。 -->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
+</plist>

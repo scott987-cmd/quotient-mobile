@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 不做追踪：没有广告标识符、没有第三方 SDK、不跨 App 关联用户。 -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<!-- 不收集任何数据。
+	     这个 App 读的是用户自己 iCloud 云盘里的文件，数据从不离开
+	     用户的设备和他自己的 iCloud —— 没有我们的服务器，
+	     推送也是用户自己的 Mac 直连 APNs。 -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+
+	<!-- Apple 要求为这几类 API 申报使用理由（2024 年起强制）。 -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<!-- UserDefaults：存 iCloud 文件夹的安全作用域书签、
+			     机器显示顺序。只读写本 App 自己的数据。 -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+		<dict>
+			<!-- 文件时间戳：判断快照/看板数据是否过期，
+			     以及催 iCloud 下载还没同步下来的文件。 -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
