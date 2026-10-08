@@ -941,8 +941,10 @@ final class IndependentOfficeLifeUITests: XCTestCase {
     }
     private func expect(_ element: XCUIElement, _ value: String, timeout: Double = 6, file: StaticString = #filePath, line: UInt = #line) {
         let predicate = NSPredicate(format: "value == %@", value)
-        let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: timeout)
-        XCTAssertEqual(result, .completed, "Expected office state: \(value), actual: \(String(describing: element.value))", file: file, line: line)
+        _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: timeout)
+        // A slow accessibility query can finish after the waiter deadline. Assert the final observed state.
+        let actual = element.value as? String
+        XCTAssertEqual(actual, value, "Expected office state: \(value), actual: \(String(describing: actual))", file: file, line: line)
     }
     private func capture(_ app: XCUIApplication, _ name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())

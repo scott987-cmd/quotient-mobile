@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "1efda7d0b9e9312549eeedf56fca6f35ea35e208",
+  "sourceCommit": "9a17e14682ffa3f7030fa92bf65dcc622271766a",
   "sourceIncludesWorkingTreeChanges": true,
   "files": {
     ".github/workflows/ci.yml": "59274715991da49c180edd6d7f2d9d6e7bdfbd9a67348fe67c28eccd8c73db56",
@@ -36,7 +36,7 @@
     "LLMQuotaAppTests/StagedRefreshTests.swift": "df750b00020c0e10a73e1555684466e0af4ef2cddc1e6b33167aedda81bc2c2c",
     "LLMQuotaAppUITests/QuotaAccuracyIndependentUITests.swift": "ad9a13a27c744259e50524e3103677bb7f690750a21f4f6f8003f6357ad06b83",
     "LLMQuotaAppUITests/ReserveReviewIndependentUITests.swift": "81a0e247e9690f7a333ece46472d9ce5837b8db946255a1c9733cf5b901dac0b",
-    "LLMQuotaAppUITests/SmokeUITests.swift": "e2a1b3e54daa701178d437f260a8a7bb26036ef419824fe1c595d11c350928b9",
+    "LLMQuotaAppUITests/SmokeUITests.swift": "b651aaf262ea88582557d076cd9659772da61f7f2a290d3ddbdaedecabe0ba11",
     "README.md": "30f0247dc628f377fe09609cfd22f6f7fac00e6ef8ddb0f1d11a8e88eebabe7c",
     "SECURITY.md": "3aca498e8baf22a9afa06ba9fdbe03669dc81ca60c04a270cb65809db54110c0",
     "Tools/verify_manifest.py": "bebbf3cff88a7b074b5204cff2a9c5abc86b5883ad5560477b2f195adefe55cc",
