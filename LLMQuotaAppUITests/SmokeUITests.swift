@@ -1016,7 +1016,12 @@ final class IndependentOfficeLifeUITests: XCTestCase {
         open(app)
         let shared = app.descendants(matching: .any)["office-shared-break-life-a"]
         XCTAssertTrue(shared.waitForExistence(timeout: 125), "两人已闲一小时，应在实际两分钟节奏中一起休息")
-        XCTAssertTrue(["一起伸个懒腰", "一起喝口水"].contains(app.buttons["office-role-codex"].value as? String ?? ""))
+        // 休息只占每两分钟的前 30 秒；慢速 CI 的 AX 查询可能在标签出现
+        // 后跨过本轮窗口。等待下一轮员工状态，仍要求实际看到休息动作。
+        let resting = NSPredicate(format: "value IN %@", ["一起伸个懒腰", "一起喝口水"])
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(
+            predicate: resting, object: app.buttons["office-role-codex"]
+        )], timeout: 125), .completed)
         capture(app, "两人一起休息")
         try board([["id": "new-work", "state": "running", "platform": "kimi", "title": "打断休息的新工作"]])
         refresh(app)
