@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "114d740c3f5b4e7eb373b4acdd6a5484ca654fd8",
+  "sourceCommit": "1efda7d0b9e9312549eeedf56fca6f35ea35e208",
   "sourceIncludesWorkingTreeChanges": true,
   "files": {
     ".github/workflows/ci.yml": "59274715991da49c180edd6d7f2d9d6e7bdfbd9a67348fe67c28eccd8c73db56",
@@ -23,7 +23,7 @@
     "LLMQuotaApp/Plan.swift": "543fb7607b3d69f6e7a9354a0ea5b7e47ade134881c05a076befd28fec7fc137",
     "LLMQuotaApp/Playbook.swift": "1d9917bc1f4f62e34f4922d555535eb16126d4e5bf182ce4eaf87b6a83e35f74",
     "LLMQuotaApp/PrivacyInfo.xcprivacy": "1ed83ac6b96e087b01dd3e1543999df544491500f9951141b192535660b3359e",
-    "LLMQuotaApp/Push.swift": "44594b85c358e4f4abee795950a80f3467e5df49caa6c095552cdab11b047884",
+    "LLMQuotaApp/Push.swift": "d8bf6f4140616acb01ef3a5976acd9ac966d30fa809d85648d944d82d0875cfb",
     "LLMQuotaApp/Reserve.swift": "60fb35815c213cd6cf1bed276426243efa63676bdb13a58adbf1c0753a19a09a",
     "LLMQuotaApp/Review.swift": "f206fed39c3f4a6b903a7c7a66ada0a4148a8eefc4eb4cb235ce620c00af8025",
     "LLMQuotaApp/SharedDirectoryWriter.swift": "0b4a07e834e3acf71ab79f42a26c7edd85651f7bb1c891017ee3d68b3bd12e04",
@@ -36,7 +36,7 @@
     "LLMQuotaAppTests/StagedRefreshTests.swift": "df750b00020c0e10a73e1555684466e0af4ef2cddc1e6b33167aedda81bc2c2c",
     "LLMQuotaAppUITests/QuotaAccuracyIndependentUITests.swift": "ad9a13a27c744259e50524e3103677bb7f690750a21f4f6f8003f6357ad06b83",
     "LLMQuotaAppUITests/ReserveReviewIndependentUITests.swift": "81a0e247e9690f7a333ece46472d9ce5837b8db946255a1c9733cf5b901dac0b",
-    "LLMQuotaAppUITests/SmokeUITests.swift": "68ff315564f9d457c267acb81b0b68b8a4b9b28621cb6b37ca17807061ec45e4",
+    "LLMQuotaAppUITests/SmokeUITests.swift": "e2a1b3e54daa701178d437f260a8a7bb26036ef419824fe1c595d11c350928b9",
     "README.md": "30f0247dc628f377fe09609cfd22f6f7fac00e6ef8ddb0f1d11a8e88eebabe7c",
     "SECURITY.md": "3aca498e8baf22a9afa06ba9fdbe03669dc81ca60c04a270cb65809db54110c0",
     "Tools/verify_manifest.py": "bebbf3cff88a7b074b5204cff2a9c5abc86b5883ad5560477b2f195adefe55cc",

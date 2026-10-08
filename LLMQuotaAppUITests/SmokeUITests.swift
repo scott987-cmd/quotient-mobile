@@ -234,10 +234,14 @@ final class SmokeUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["Agent 协作中断：咨询执行失败"]
             .waitForExistence(timeout: 10))
-        app.buttons["notification-current"].tap()
+        let current = app.buttons["notification-current"]
+        XCTAssertGreaterThanOrEqual(current.frame.height, 44,
+                                    "通知当前事项必须有完整的触控高度")
+        current.tap()
         XCTAssertTrue(app.navigationBars["Agent 协作"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["opencode.openrouter.code → claude-runner"]
             .waitForExistence(timeout: 5))
+        XCTAssertFalse(current.isHittable, "协作内容出现时必须已经离开旧通知详情")
     }
 
     private func moreFixture() throws -> String {

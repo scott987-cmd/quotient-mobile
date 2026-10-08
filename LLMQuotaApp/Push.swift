@@ -270,7 +270,13 @@ struct NotificationDetailView: View {
                             Button("重新加载详情") { Task { await load() } }
                                 .disabled(loading || target.notificationID == nil)
                         }
-                        NavigationLink("查看当前事项") { currentPage }
+                        NavigationLink {
+                            currentPage
+                        } label: {
+                            Label("查看当前事项", systemImage: "arrow.up.right")
+                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        }
+                            .buttonStyle(.borderedProminent)
                             .accessibilityIdentifier("notification-current")
                     }
                     .padding(16)
