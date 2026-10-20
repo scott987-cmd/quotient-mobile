@@ -159,8 +159,13 @@ final class IndependentRoutingUITests: XCTestCase {
         }
         app.launch()
         XCTAssertTrue(app.navigationTab("办公室").waitForExistence(timeout: 10)); app.navigationTab("办公室").tap()
-        if app.windows.firstMatch.frame.width >= 960 {
-            app.buttons.matching(identifier: "office-role-codex").element(boundBy: 1).tap()
+        let secondDesk = app.buttons.matching(identifier: "office-role-codex").element(boundBy: 1)
+        if secondDesk.waitForExistence(timeout: 5) {
+            // iPad 竖屏虽不足 960pt，仍是 regular size class 的双机器布局。
+            // 按实际工位数量选 B 机，避免把平板误当成手机切换页。
+            for _ in 0..<3 where !secondDesk.isHittable { app.swipeUp() }
+            XCTAssertTrue(secondDesk.isHittable)
+            secondDesk.tap()
         } else {
             let mini = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Mac mini")).firstMatch
             XCTAssertTrue(mini.waitForExistence(timeout: 5)); mini.tap()
@@ -661,6 +666,63 @@ final class SmokeUITests: XCTestCase {
     }
 
     @MainActor
+    func testBoardDoesNotCountColdTasksAsCurrentlyRunning() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("llmq-board-cold-" + UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let dir = root.appendingPathComponent("taskboards", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let now = ISO8601DateFormatter().string(from: Date())
+        let cold = ISO8601DateFormatter().string(from: Date().addingTimeInterval(-3600))
+        try Data("""
+        {"generatedAt":"\(now)","machines":[],"reports":[]}
+        """.utf8).write(to: root.appendingPathComponent("dashboard.json"), options: .atomic)
+        try Data("""
+        {"machineID":"fresh","machineName":"新鲜机器","generatedAt":"\(now)","tasks":[]}
+        """.utf8).write(to: dir.appendingPathComponent("fresh.json"), options: .atomic)
+        try Data("""
+        {"machineID":"cold","machineName":"过期机器","generatedAt":"\(cold)","tasks":[{"id":"stale-run","title":"一小时前的旧运行","state":"running"}]}
+        """.utf8).write(to: dir.appendingPathComponent("cold.json"), options: .atomic)
+
+        let app = XCUIApplication()
+        app.launchEnvironment["LLMQ_FOLDER"] = root.path
+        app.launch()
+        XCTAssertTrue(app.navigationTab("看板").waitForExistence(timeout: 10))
+        app.navigationTab("看板").tap()
+        XCTAssertTrue(app.navigationBars["看板"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.staticTexts["1"].exists,
+                       "一小时前的旧 running 不能算成此刻在跑")
+        XCTAssertTrue(app.staticTexts["在跑"].exists)
+        XCTAssertTrue(app.staticTexts["在跑等当前状态仅统计新鲜任务板"].exists,
+                      "必须解释为什么旧板子上的活没有计入当前数字")
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "board-cold-task-not-running"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    @MainActor
+    func testBoardDoesNotPresentMissingTaskDataAsZero() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("llmq-board-unknown-" + UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let now = ISO8601DateFormatter().string(from: Date())
+        try Data("""
+        {"generatedAt":"\(now)","machines":[],"reports":[]}
+        """.utf8).write(to: root.appendingPathComponent("dashboard.json"), options: .atomic)
+        let app = XCUIApplication()
+        app.launchEnvironment["LLMQ_FOLDER"] = root.path
+        app.launch()
+        XCTAssertTrue(app.navigationTab("看板").waitForExistence(timeout: 10))
+        app.navigationTab("看板").tap()
+        XCTAssertTrue(app.navigationBars["看板"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["任务板数据不足，当前任务数未知"].exists)
+        XCTAssertTrue(app.staticTexts["—"].exists,
+                      "没有任何新鲜任务板时不能把未知显示成在跑 0")
+    }
+
+    @MainActor
     func testGoldenSampleGateReasonIsVisibleWithoutANewClientSchema() throws {
         let app = XCUIApplication()
         app.launchEnvironment["LLMQ_FOLDER"] = try productionGateFixture()
@@ -938,6 +1000,13 @@ final class IndependentOfficeLifeUITests: XCTestCase {
     private func open(_ app: XCUIApplication) {
         app.launch(); XCTAssertTrue(app.navigationTab("办公室").waitForExistence(timeout: 10))
         app.navigationTab("办公室").tap()
+        // iPadOS 26 的悬浮 tab 有时第一次 XCTest tap 只聚焦控件，页面仍停在「现在」。
+        // 必须实际进入办公室后才检查工位；第二次仍失败就保留红测。
+        let office = app.navigationBars["办公室"]
+        if !office.waitForExistence(timeout: 4) {
+            app.navigationTab("办公室").tap()
+            XCTAssertTrue(office.waitForExistence(timeout: 6))
+        }
     }
     private func expect(_ element: XCUIElement, _ value: String, timeout: Double = 6, file: StaticString = #filePath, line: UInt = #line) {
         let predicate = NSPredicate(format: "value == %@", value)
@@ -1119,7 +1188,11 @@ final class IndependentReviewReadinessUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["1 份成果等你验收"].waitForExistence(timeout: 7))
         XCTAssertTrue(app.staticTexts["待我处理"].exists)
         XCTAssertFalse(app.staticTexts["1 份保留成果，无需你确认"].exists)
-        tap(app.staticTexts["1 份成果等你验收"], in: app)
+        // iPad 上 NavigationLink 的子文本可见但点它可能仍停在「现在」；
+        // 点整张可访问的成果卡，继续验证后续按钮与回执。
+        let readyCard = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "1 份成果等你验收")).firstMatch
+        tap(readyCard, in: app)
         tap(app.buttons["查看并决定"], in: app)
         XCTAssertTrue(app.buttons["通过并合入"].isEnabled)
         capture(app, "质量准备完成-重新可确认")

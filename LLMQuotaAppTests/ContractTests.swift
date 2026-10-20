@@ -426,7 +426,49 @@ final class ContractTests: XCTestCase {
 
     func testDemoTasksKeepDeclaredIDs() {
         let ids = Demo.boards().flatMap(\.tasks).map(\.taskID)
-        XCTAssertEqual(ids, ["d1", "d2", "d3", "d4"])
+        XCTAssertEqual(ids, ["d1", "d2", "d3", "d4", "d5"])
+    }
+
+    func testDemoBoardCoversEveryAdvertisedMachine() throws {
+        let dashboard = try XCTUnwrap(Demo.dashboard())
+        let boards = Demo.boards()
+        XCTAssertEqual(Set(boards.map(\.machineID)),
+                       Set(dashboard.machines.map(\.machineID)))
+        XCTAssertEqual(boards.first { $0.machineID == "demo-mini" }?.tasks.map(\.taskID),
+                       ["d1", "d2", "d3", "d4"])
+        XCTAssertEqual(boards.first { $0.machineID == "demo-mbp" }?.tasks.map(\.taskID), ["d5"])
+    }
+
+    @MainActor
+    func testDemoReviewsExplainReadOnlyStateAndNeverWriteToConnectedRoot() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("demo-readonly-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = Store(); store.debugAttachRoot(root); store.enterDemo()
+        let reviews = Demo.reviews()
+        XCTAssertEqual(reviews.count, 2)
+        for review in reviews {
+            XCTAssertNotNil(review.sourceMachineID)
+            XCTAssertNotNil(review.head)
+            XCTAssertEqual(review.landingBlockReason, "演示数据仅供浏览，不会向真实电脑发送操作。")
+        }
+        let invoked = await store.invoke(FeedAction(
+            id: "machine:" + MobileActionRoute.digest("demo-mini") + ":task:approve:test",
+            label: "测试"), note: nil)
+        XCTAssertFalse(invoked)
+        let submitted = await store.submit(prompt: "演示任务", repo: nil)
+        XCTAssertNil(submitted)
+        let reserved = await store.setReserve(platform: "codex", fraction: 0.25)
+        XCTAssertFalse(reserved)
+        let discarded = await store.decideReview(try XCTUnwrap(reviews.first), action: "discard", reason: nil)
+        XCTAssertFalse(discarded)
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: root.path), [])
+    }
+
+    @MainActor
+    func testPlaybookBriefRendersMarkdownWithoutRawDelimiters() {
+        let rendered = PlaybookView.formattedBrief("**做什么**：完成验收。\n\n**产出去哪**：报告。")
+        XCTAssertEqual(String(rendered.characters), "做什么：完成验收。\n\n产出去哪：报告。")
     }
 
     func testTaskTitleClamping() {

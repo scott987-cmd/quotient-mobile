@@ -4,6 +4,14 @@ This is the iOS companion for Quotient Core. It displays quota, work, questions,
 and review state published by your own Macs. This source snapshot contains no
 Apple signing identity, private iCloud data, task ledger, or QA recordings.
 
+The current snapshot tracks the source used for iOS 1.0 build `202610192053`,
+submitted to App Review on 2026-10-19 as **Quotient 多机编程台**. The App Store
+review was still pending when this snapshot was prepared. The public project
+uses an example bundle ID and has signing disabled, so its output is not the
+signed TestFlight package. The local release's independent simulator suites
+passed 142/147 iPhone and 143/147 iPad tests with zero failures; conditional
+skips included three tests requiring a live Mac producer on each device.
+
 ## Build for the simulator
 
 Requirements: Xcode 26.6 with an iOS 26 simulator and
@@ -22,12 +30,3 @@ test does not validate those production services.
 
 The Mac core and its protocol are maintained separately. Older records omit
 some fields; keep backward-compatible decoding when changing shared data.
-
-## Public snapshot and submitted build
-
-This repository is the October 8, 2026 source snapshot. It predates the iOS
-1.0 TestFlight/App Review build `202610092221` made on October 9, which includes
-a later task-board freshness change. Do not treat this snapshot's simulator
-results as validation of that submitted binary. The current review state and
-the separate simulator/physical-device evidence are listed on the
-[Quotient status page](https://scott987-cmd.github.io/quotient/app-store-readiness.html).

@@ -53,6 +53,12 @@ struct PlaybookView: View {
     @State private var noteFor: String?
     @State private var note = ""
 
+    static func formattedBrief(_ raw: String) -> AttributedString {
+        (try? AttributedString(markdown: raw,
+                               options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+            ?? AttributedString(raw)
+    }
+
     private var pending: [PlaybookProject] {
         store.projects.filter { !$0.isApproved }
     }
@@ -125,7 +131,7 @@ struct PlaybookView: View {
             // 方案正文。默认收起 —— 一屏塞不下，而且列表里同时有好几个时
             // 全展开会让人根本不想读。要批的东西必须让人读得下去。
             if expanded.contains(p.id) {
-                Text(p.brief)
+                Text(Self.formattedBrief(p.brief))
                     .font(.callout)
                     .textSelection(.enabled)
                 ForEach(p.recipes) { r in
@@ -149,7 +155,7 @@ struct PlaybookView: View {
                     }
                 }
             } else {
-                Text(p.brief.split(separator: "\n").first.map(String.init) ?? "")
+                Text(Self.formattedBrief(p.brief.split(separator: "\n").first.map(String.init) ?? ""))
                     .font(.callout).foregroundStyle(.secondary)
                     .lineLimit(2)
             }

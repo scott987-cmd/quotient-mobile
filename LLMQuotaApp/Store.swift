@@ -1027,6 +1027,7 @@ extension Store {
     /// 放一个小文件，Mac 端下一轮读到就应用。
     @discardableResult
     func approveProject(_ id: String, note: String) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard let root else { lastError = "还没连上文件夹"; return false }
 
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1123,6 +1124,7 @@ extension Store {
     /// 加一种新动作因此不需要动客户端。
     @discardableResult
     func invoke(_ action: FeedAction, note: String?) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard let root else { lastError = "还没连上文件夹"; return false }
         guard MobileActionRoute.parse(action.id) != nil else {
             lastError = "操作缺少可靠的来源机器，请更新 Mac 后刷新。"; return false
@@ -1362,6 +1364,7 @@ extension Store {
     /// 跑不过不会合。手机这边只表达意愿，不做判断。
     @discardableResult
     func decideReview(_ d: ReviewDigest, action: String, reason: String?) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard ["merge", "discard", "continue"].contains(action), let id = d.actionID(action) else {
             lastError = "成果缺少来源机器，请更新 Mac 后刷新。"; return false
         }
@@ -1384,12 +1387,14 @@ extension Store {
     }
 
     func canContinueReview(_ review: ReviewDigest) -> Bool {
+        guard !isDemo else { return false }
         guard let id = review.actionID("continue"), review.continuationBlockReason == nil else { return false }
         return reviewSubmission(review)?.preventsResubmission != true
             && actionSubmission(for: id)?.preventsResubmission != true && !hasPendingReviewAction(id)
     }
 
     func canDisposeReview(_ review: ReviewDigest) -> Bool {
+        guard !isDemo else { return false }
         guard let id = review.actionID("merge") else { return false }
         return reviewSubmission(review)?.preventsResubmission != true && !hasPendingReviewAction(id)
             && review.actionID("continue").flatMap { actionSubmission(for: $0) }?.receipt?.state != "succeeded"
@@ -1442,6 +1447,7 @@ extension Store {
     /// 和它当前挂着的那个问题对得上时才采纳。少了这一层，一份迟到的答复
     /// 会把一个已经完成的任务复活重跑，白烧一次额度。
     func answer(ask: Ask, replies: [String: String], abandon: Bool) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard let root else { lastError = "还没连上文件夹"; return false }
 
         let env = AskAnswer(askID: ask.id, taskID: ask.taskID, machineID: ask.machineID,
@@ -1558,6 +1564,7 @@ extension Store {
     func submit(prompt: String, repo: String?, platform: String? = nil,
                 machineID: String? = nil,
                 machineName: String? = nil) async -> SubmissionReceipt? {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return nil }
         guard let root else { lastError = "还没连上文件夹"; return nil }
 
         // 用 json 而不是 txt：txt 只能带提示词，指定不了仓库。
@@ -1639,6 +1646,7 @@ extension Store {
     /// 移走即消费 —— 不带目标的话，另一台机器把它抢走，这条放行就永久丢了
     /// （那台的清单里没有这个 id，回执写「已放行过或被删了」，全是误导）。
     func releasePlan(machineID: String, planID: String) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard let root else { lastError = "还没连上文件夹"; return false }
         guard !machineID.isEmpty else { lastError = "这块板子没带机器 ID，放行发不出去"; return false }
 
@@ -1685,6 +1693,7 @@ extension Store {
     }
 
     func setReserve(platform: String, fraction: Double) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard let root else { lastError = "还没连上文件夹"; return false }
         guard fraction.isFinite, fraction >= 0, fraction <= 0.95 else {
             lastError = "留白只能在 0% 到 95% 之间，没有写出去"; return false
@@ -1783,6 +1792,7 @@ extension Store {
     /// 指挥身份、机器静音、留白等字段不在信封里，因此旧客户端不可能洗掉它们。
     func updateRole(platform: String, title: String, maxRisk: String,
                     tierLimit: String, prefers: [String], note: String) async -> Bool {
+        guard !isDemo else { lastError = "演示数据仅供浏览，不会向真实电脑发送操作。"; return false }
         guard let root else { lastError = "还没连上文件夹"; return false }
         let cleanTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let cleanNote = note.trimmingCharacters(in: .whitespacesAndNewlines)

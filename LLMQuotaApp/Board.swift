@@ -197,17 +197,14 @@ struct BoardView: View {
 
     private var throughput: Throughput {
         var t = Throughput()
-        for b in store.taskDigest.rawBoards {
-            for task in b.tasks {
-                switch task.state {
-                case "running": t.running += 1
-                case "queued":  t.queued += 1
-                case "blocked": t.blocked += 1
-                case "failed":  t.failed += 1
-                default: break
-                }
-            }
-        }
+        // 和首页、办公室共用同一份新鲜度/项目作用域判定。原始任务板里的
+        // running 可能是一小时前的旧状态，不能在这里重新算成“此刻在跑”。
+        let digest = store.taskDigest
+        t.running = digest.running.count
+        t.queued = digest.queued.count
+        t.blocked = digest.blocked.count
+        // 失败是终态，旧板子里的失败记录仍然成立。
+        t.failed = digest.finished.filter { $0.known == .failed }.count
         let dayAgo = Date().addingTimeInterval(-86400)
         for r in store.results where r.updatedAt > dayAgo {
             if r.isDone { t.done24h += 1 }
@@ -218,6 +215,10 @@ struct BoardView: View {
 
     private var overviewSection: some View {
         let t = throughput
+        let digest = store.taskDigest
+        let hasFreshBoard = digest.boards.contains {
+            $0.unreadable == nil && !$0.isCold
+        }
         let urgent = watchedStatuses.filter {
             [.exhausted, .atRisk, .wasting].contains($0.status.effectiveHealth)
                 || $0.status.wasteFraction > 0.05
@@ -225,10 +226,20 @@ struct BoardView: View {
         return Section("现在") {
             HStack(spacing: 0) {
                 stat("要关注", urgent, urgent > 0 ? .orange : .secondary)
-                stat("在跑", t.running, .blue)
-                stat("卡住/失败", t.blocked + t.failed,
+                stat("在跑", hasFreshBoard ? t.running : nil, .blue)
+                stat("卡住/失败", hasFreshBoard ? t.blocked + t.failed : nil,
                      t.blocked + t.failed > 0 ? .red : .secondary)
                 stat("24h 交付", t.done24h, .green)
+            }
+            if !hasFreshBoard {
+                Text("任务板数据不足，当前任务数未知")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            } else if !digest.unreadableBoards.isEmpty
+                || !digest.coldBoards.isEmpty {
+                Text("在跑等当前状态仅统计新鲜任务板")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
             }
             if t.queued > 0 || t.failed24h > 0 {
                 Text([
@@ -241,9 +252,9 @@ struct BoardView: View {
         }
     }
 
-    private func stat(_ label: String, _ n: Int, _ color: Color) -> some View {
+    private func stat(_ label: String, _ n: Int?, _ color: Color) -> some View {
         VStack(spacing: 2) {
-            Text("\(n)").font(.title3.monospacedDigit().bold())
+            Text(n.map { String($0) } ?? "—").font(.title3.monospacedDigit().bold())
                 .foregroundStyle(color)
             Text(label).font(.caption2).foregroundStyle(.secondary)
         }

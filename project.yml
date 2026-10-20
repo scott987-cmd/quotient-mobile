@@ -28,7 +28,7 @@ targets:
         # 包/可执行文件用稳定的 ASCII 名，桌面显示名仍由 CFBundleDisplayName 决定。
         # 否则 XCTest 自动推导的 TEST_HOST 会指向不存在的 LLMQuotaApp.app。
         PRODUCT_NAME: LLMQuotaApp
-        INFOPLIST_KEY_CFBundleDisplayName: 数字员工
+        INFOPLIST_KEY_CFBundleDisplayName: Quotient
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         # iPad 必须四个方向全支持，否则上传直接被拒（错误码 90474）——
         # 只要 TARGETED_DEVICE_FAMILY 里带了 2，苹果就按 iPad 多任务要求校验。
@@ -40,7 +40,7 @@ targets:
     info:
       path: LLMQuotaApp/Info.plist
       properties:
-        CFBundleDisplayName: 数字员工
+        CFBundleDisplayName: Quotient
         # 版本号只认上面 settings 里的 MARKETING_VERSION / CURRENT_PROJECT_VERSION。
         # xcodegen 每次 generate 都会按这里重写 Info.plist,不写这两行它就填默认的 1.0/1,
         # 上传 TestFlight 会被拒("bundle version must be higher than …")。

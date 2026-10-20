@@ -68,7 +68,7 @@ enum Demo {
             {
               "platform": "codex", "planName": "ChatGPT Plus",
               "detected": true, "installed": true,
-              "lastActivity": "\(at(-9000))",
+              "lastActivity": "\(at(-120))",
               "last30dRequests": 4001, "last30dBillableTokens": 27400000,
               "machines": ["演示 · Mac mini"],
               "statuses": [
@@ -88,7 +88,7 @@ enum Demo {
             {
               "platform": "qwen", "planName": "Qwen Code",
               "detected": true, "installed": true,
-              "lastActivity": "\(at(-1800))",
+              "lastActivity": "\(at(-600))",
               "last30dRequests": 519, "last30dBillableTokens": 5200000,
               "machines": ["演示 · MacBook"],
               "statuses": [
@@ -96,7 +96,7 @@ enum Demo {
                  "used":93,"limit":100,"usedFraction":0.93,
                  "resetsAt":"\(at(5.5 * 3600))",
                  "projectedUsedFraction":1.0,"projectedWaste":0,
-                 "health":"exhausted","isOfficial":true,"sourceNote":"演示数据"}
+                 "health":"atRisk","isOfficial":true,"sourceNote":"演示数据"}
               ]
             },
             {
@@ -128,17 +128,21 @@ enum Demo {
         [
           {
             "repo":"/demo/game","repoName":"示例游戏",
+            "sourceMachineID":"demo-mini","head":"a1b2c3d4a1b2c3d4a1b2c3d4a1b2c3d4a1b2c3d4",
+            "landingBlockReason":"演示数据仅供浏览，不会向真实电脑发送操作。",
             "branch":"agent/claude/a1b2c3d4","platform":"claude",
             "subject":"修黑屏：把散装 PNG 收进 Assets.xcassets",
             "prompt":"游戏启动后一片黑，只有 HUD 能看见。查清楚为什么，修掉，并在模拟器上实跑一局截图为证。",
             "files":["Sources/Game/Assets.xcassets","Sources/Game/Scene.swift"],
             "insertions":148,"deletions":12,
             "mergesCleanly":true,"overlapsWith":[],
-            "committedAt":"\(at(-3600))",
+            "committedAt":"\(at(-850))",
             "evidence":["docs/evidence/01-开局.png","docs/evidence/02-通关.png"]
           },
           {
             "repo":"/demo/tool","repoName":"示例工具",
+            "sourceMachineID":"demo-mini","head":"e5f6a7b8e5f6a7b8e5f6a7b8e5f6a7b8e5f6a7b8",
+            "landingBlockReason":"演示数据仅供浏览，不会向真实电脑发送操作。",
             "branch":"agent/codex/e5f6a7b8","platform":"codex",
             "subject":"补测试：额度窗口边界的三种情况",
             "prompt":"为额度引擎补单元测试，覆盖窗口刚开始、快结束、以及跨重置点这三种情况。",
@@ -163,13 +167,13 @@ enum Demo {
         // 里面的 tasks 才是 Decodable —— 所以两段分开写。
         let tasks: [TaskBrief] = decode("""
         [
-          {"id":"d1","title":"给卡牌补一版新美术，风格对齐已有的三张",
-           "state":"running","platform":"minimax","machineName":"演示 · Mac mini",
-           "startedAt":"\(at(-420))","elapsedSeconds":420,"repoAlias":"示例游戏",
+          {"id":"d1","title":"核对跨机任务汇总，排除过期任务板",
+           "state":"running","platform":"codex","machineName":"演示 · Mac mini",
+           "startedAt":"\(at(-420))","elapsedSeconds":420,"repoAlias":"示例工具",
            "machineID":"demo-mini"},
           {"id":"d2","title":"修黑屏：把散装 PNG 收进 Assets.xcassets",
            "state":"done","platform":"claude","machineName":"演示 · Mac mini",
-           "startedAt":"\(at(-4200))","elapsedSeconds":880,"repoAlias":"示例游戏",
+           "startedAt":"\(at(-4200))","elapsedSeconds":3300,"repoAlias":"示例游戏",
            "machineID":"demo-mini"},
           {"id":"d3","title":"补测试：额度窗口边界的三种情况",
            "state":"done","platform":"codex","machineName":"演示 · Mac mini",
@@ -177,13 +181,23 @@ enum Demo {
            "machineID":"demo-mini"},
           {"id":"d4","title":"清一条 TODO：重试次数改成可配置",
            "state":"queued","machineName":"演示 · Mac mini",
-           "repoAlias":"示例工具","machineID":"demo-mini"}
+           "repoAlias":"示例工具","machineID":"demo-mini"},
+          {"id":"d5","title":"核对跨机任务板的新鲜度与来源",
+           "state":"running","platform":"qwen","machineName":"演示 · MacBook",
+           "startedAt":"\(at(-720))","elapsedSeconds":720,"repoAlias":"示例工具",
+           "machineID":"demo-mbp"}
         ]
         """) ?? []
-        return [TaskBoardLoad(machineID: "demo-mini",
-                              machineName: "演示 · Mac mini",
-                              generatedAt: Date().addingTimeInterval(-90),
-                              tasks: tasks)]
+        return [
+            TaskBoardLoad(machineID: "demo-mini",
+                          machineName: "演示 · Mac mini",
+                          generatedAt: Date().addingTimeInterval(-90),
+                          tasks: tasks.filter { $0.taskID != "d5" }),
+            TaskBoardLoad(machineID: "demo-mbp",
+                          machineName: "演示 · MacBook",
+                          generatedAt: Date().addingTimeInterval(-300),
+                          tasks: tasks.filter { $0.taskID == "d5" })
+        ]
     }
 
     /// 办公室事件流：数字员工在干什么。这是这个 App 最有辨识度的一屏。
@@ -205,9 +219,13 @@ enum Demo {
            "detail":"改了 2 个文件，验证通过，附了 2 张实跑截图",
            "taskTitle":"修黑屏：把散装 PNG 收进 Assets.xcassets"},
           {"id":"e5","at":"\(at(-420))","kind":"dispatched","taskID":"d1",
-           "platform":"minimax","machineID":"demo-mini",
-           "detail":"接到新活（空窗填活：周窗还剩 85% 没用）",
-           "taskTitle":"给卡牌补一版新美术"}
+           "platform":"codex","machineID":"demo-mini",
+           "detail":"开始检查 Mac mini 的任务板和来源时间",
+           "taskTitle":"核对跨机任务汇总，排除过期任务板"},
+          {"id":"e6","at":"\(at(-720))","kind":"dispatched","taskID":"d5",
+           "platform":"qwen","machineID":"demo-mbp",
+           "detail":"在另一台机器开始核对任务来源与快照时间",
+           "taskTitle":"核对跨机任务板的新鲜度与来源"}
         ]
         """) ?? []
     }
@@ -227,12 +245,12 @@ enum Demo {
              "note": "只显示 Agent 主动留下的结论、问题、证据和交接",
              "cards": [
                {"id": "demo-c1",
-                "title": "卡牌新美术的第二版方向需要拍板",
-                "body": "minimax-art → claude-runner",
-                "detail": "两个候选方向都出了草图，等确认走哪一版再继续。",
+                "title": "跨机统计应否排除过期任务板",
+                "body": "codex-cli → qwen-coder",
+                "detail": "先核对每台机器的快照时间和来源；过期任务板不能计入当前在跑任务。",
                 "tone": "warn",
                 "icon": "bubble.left.and.exclamationmark.bubble.right",
-                "trailing": "示例游戏"},
+                "trailing": "示例工具"},
                {"id": "demo-c2",
                 "title": "黑屏修复已交付，附实跑截图",
                 "body": "claude-code · 项目广播",
@@ -255,11 +273,11 @@ enum Demo {
         decode("""
         [
           {
-            "id":"demo-content","name":"示例：素材包产线",
-            "brief":"**做什么**：用闲置的生图额度做素材包，上架卖。\\n\\n**为什么是这个**：生图额度每周都有大半没用完就清零，而这条产线已经跑通。\\n\\n**怎么算合格**：同一批风格统一、抽验 4 张没有明显跑偏、每张都裁掉底部签名区。\\n\\n**产出去哪**：packs/ 目录，上架前停下来等你确认。",
+            "id":"demo-content","name":"示例：跨机交付闭环",
+            "brief":"**做什么**：让两台 Mac 的任务、证据和成果回执归到同一项目。\\n\\n**为什么是这个**：只看单机列表会漏掉另一台机器的进度，也可能把过期任务算成正在运行。\\n\\n**怎么算合格**：任务来源、版本和快照时间可追溯；过期数据明确标出；成果决定能收到对应 Mac 的执行回执。\\n\\n**产出去哪**：项目看板和成果复核页；需要人的决定时先停下。",
             "recipes":[
-              {"title":"出一个新主题包","prompt":"主题已经定了：{{topic}}。别自己换题——方向由人定，你负责把它做好。",
-               "tier":"complex","platform":"minimax","publishes":true}
+              {"title":"核对一次跨机交付","prompt":"核对 {{project}} 的两台 Mac 任务板和成果版本；发现过期或缺失就说明范围，不要把未知写成零。",
+               "tier":"complex","platform":"codex","publishes":true}
             ],
             "runs":0,"paused":false
           }

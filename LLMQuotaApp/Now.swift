@@ -1193,8 +1193,12 @@ private struct DeliveryStatusCard: View {
             }
             Text(digest.truncated ? "当前已读任务与最近成果，部分记录未展示" : "当前任务与最近成果，不是累计交付数量")
                 .font(.caption2).foregroundStyle(.secondary)
-            if !digest.cold.isEmpty || !digest.unreadableBoards.isEmpty {
-                Text("部分机器状态尚未更新，未计入当前运行和等待数量")
+            if !digest.unreadableBoards.isEmpty {
+                Text("有机器的任务板读不到，以上数字仅统计已读取记录")
+                    .font(.caption2).foregroundStyle(.orange)
+            }
+            if !digest.coldBoards.isEmpty {
+                Text("部分机器任务板已过期，当前运行和等待数量不完整")
                     .font(.caption2).foregroundStyle(.orange)
             }
         }
